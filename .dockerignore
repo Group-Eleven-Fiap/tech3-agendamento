@@ -1,0 +1,9 @@
+.git
+.idea
+.junie
+target
+*.log
+Dockerfile*
+docker-compose*.yml
+README.md
+postman

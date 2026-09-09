@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-agendamento}
+      POSTGRES_USER: ${DB_USERNAME:-agendamento}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-agendamento}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-agendamento}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-agendamento}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-agendamento}
+      DB_USERNAME: ${DB_USERNAME:-agendamento}
+      DB_PASSWORD: ${DB_PASSWORD:-agendamento}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-agendamento}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-agendamento}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-change-this-demo-secret-to-a-long-random-value-32}
+      APP_JWT_EXPIRATION_SECONDS: ${APP_JWT_EXPIRATION_SECONDS:-3600}
+      AGENDAMENTO_EVENTS_EXCHANGE: ${AGENDAMENTO_EVENTS_EXCHANGE:-agendamento.events}
+      AGENDAMENTO_EVENTS_ROUTING_KEY: ${AGENDAMENTO_EVENTS_ROUTING_KEY:-agendamento.appointment.changed}
+      OUTBOX_PUBLISHER_ENABLED: ${OUTBOX_PUBLISHER_ENABLED:-true}
+      OUTBOX_PUBLISHER_DELAY_MS: ${OUTBOX_PUBLISHER_DELAY_MS:-5000}
+      OUTBOX_RETRY_DELAY_SECONDS: ${OUTBOX_RETRY_DELAY_SECONDS:-30}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  rabbitmq_data:

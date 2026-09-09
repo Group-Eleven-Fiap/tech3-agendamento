@@ -1,0 +1,260 @@
+{
+  "info": {
+    "name": "MS Agendamento",
+    "description": "Login, Bearer token, Basic Auth, and appointment scheduling examples.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "appointmentId",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Login (MEDICO)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"medico\",\n  \"password\": \"medico123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set('accessToken', pm.response.json().accessToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create appointment (ENFERMEIRO)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "enfermeiro",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "enfermeiro123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"patientId\": 3,\n  \"professionalId\": 2,\n  \"scheduledAt\": \"2030-04-15T14:00:00Z\",\n  \"endsAt\": \"2030-04-15T14:30:00Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/agendamentos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "agendamentos"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    pm.collectionVariables.set('appointmentId', pm.response.json().id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List appointments (MEDICO)",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "medico",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "medico123",
+              "type": "string"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/agendamentos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "agendamentos"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List appointments (PACIENTE)",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "paciente",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "paciente123",
+              "type": "string"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/agendamentos/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "agendamentos",
+            "me"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get appointment",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "medico",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "medico123",
+              "type": "string"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/agendamentos/{{appointmentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "agendamentos",
+            "{{appointmentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Edit appointment (MEDICO)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "medico",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "medico123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"patientId\": 3,\n  \"professionalId\": 1,\n  \"scheduledAt\": \"2030-04-15T15:00:00Z\",\n  \"endsAt\": \"2030-04-15T15:30:00Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/agendamentos/{{appointmentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "agendamentos",
+            "{{appointmentId}}"
+          ]
+        }
+      }
+    }
+  ]
+}
