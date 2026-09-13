@@ -21,6 +21,10 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+  graphql:
+    http:
+      path: /api/v1/graphql
+
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}

@@ -13,6 +13,8 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
 
     List<Agendamento> findByPatientIdOrderByScheduledAtAsc(Long patientId);
 
+    List<Agendamento> findByPatientIdAndScheduledAtGreaterThanEqualOrderByScheduledAtAsc(Long patientId, Instant from);
+
     List<Agendamento> findByScheduledAtBetweenOrderByScheduledAtAsc(Instant from, Instant to);
 
     default List<Agendamento> findAllByScheduledAtAsc() {

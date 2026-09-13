@@ -1,0 +1,16 @@
+type Query {
+    historicoPaciente(
+        patientId: ID!
+        futureOnly: Boolean = false
+    ): [Agendamento!]!
+}
+
+type Agendamento {
+    id: ID!
+    patientId: ID!
+    professionalId: ID!
+    scheduledAt: String!
+    endsAt: String!
+    createdAt: String!
+    updatedAt: String!
+}

@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/agendamentos/**").authenticated()
+                        .requestMatchers("/api/v1/graphql/**").authenticated()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .anyRequest().permitAll())
                 .httpBasic(httpBasic -> httpBasic
