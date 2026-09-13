@@ -1,5 +1,6 @@
 package fiap.grupo11.msagendamento.service;
 
+import fiap.grupo11.msagendamento.dto.AgendamentoGraphQLResponse;
 import fiap.grupo11.msagendamento.dto.AgendamentoRequest;
 import fiap.grupo11.msagendamento.dto.AgendamentoResponse;
 import fiap.grupo11.msagendamento.entity.Agendamento;
@@ -90,6 +91,24 @@ public class AgendamentoService {
         return AgendamentoResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
+    public List<AgendamentoGraphQLResponse> historicoPaciente(Long patientId, boolean futureOnly, Authentication authentication) {
+
+        validatePatientAccess(patientId, authentication);
+
+        if (futureOnly) {
+            return repository.findByPatientIdAndScheduledAtGreaterThanEqualOrderByScheduledAtAsc(patientId,Instant.now())
+                    .stream()
+                    .map(AgendamentoGraphQLResponse::from)
+                    .toList();
+        }
+
+        return repository.findByPatientIdOrderByScheduledAtAsc(patientId)
+                .stream()
+                .map(AgendamentoGraphQLResponse::from)
+                .toList();
+    }
+
     private void saveEvent(Agendamento appointment, String eventType) {
         OutboxEvent event = outboxRepository.save(new OutboxEvent(null, appointment.getId(), eventType, ""));
         event.setPayload(eventSerializer.serialize(event.getId(), eventType, Instant.now(), appointment));
@@ -152,4 +171,18 @@ public class AgendamentoService {
             throw new AccessDeniedException("Authenticated application user has an invalid id");
         }
     }
+
+    private void validatePatientAccess( Long patientId, Authentication authentication) {
+        if (patientId == null) {
+            throw new IllegalArgumentException("Patient id is required");
+        }
+
+        Long currentUserId = currentUserId(authentication);
+
+        if (!isProfessional(authentication) && !patientId.equals(currentUserId)) {
+            throw new AccessDeniedException( "Patients can access only their own appointment history");
+        }
+
+    }
+
 }
