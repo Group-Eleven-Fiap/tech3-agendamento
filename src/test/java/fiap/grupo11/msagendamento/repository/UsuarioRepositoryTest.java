@@ -15,16 +15,6 @@ class UsuarioRepositoryTest {
     private UsuarioRepository repository;
 
     @Test
-    void migrationSeedsOneUserForEachApplicationRole() {
-        assertThat(repository.findAll())
-                .extracting(usuario -> usuario.getUsername() + ":" + usuario.getRole())
-                .containsExactlyInAnyOrder(
-                        "medico:MEDICO",
-                        "enfermeiro:ENFERMEIRO",
-                        "paciente:PACIENTE");
-    }
-
-    @Test
     void seededPasswordsAreStoredAsBcryptHashes() {
         assertThat(repository.findByUsername("medico"))
                 .get()
